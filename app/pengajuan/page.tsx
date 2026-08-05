@@ -36,63 +36,77 @@ export default function DaftarPengajuan() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-slate-200">
         
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Daftar Pengajuan Masuk</h1>
-          <Link href="/pengajuan/new" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700 transition">
+        {/* Header Section - Responsif (Susun bawah di HP, sejajar di Laptop) */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Daftar Pengajuan</h1>
+            <p className="text-sm text-slate-500 mt-1">Kelola semua data perizinan masuk</p>
+          </div>
+          <Link 
+            href="/pengajuan/new" 
+            className="w-full sm:w-auto text-center bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm"
+          >
             + Tambah Baru
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-100 border-b border-slate-200">
-                <th className="p-3 text-slate-600 font-semibold">No Pendaftaran</th>
-                <th className="p-3 text-slate-600 font-semibold">Nama Pemohon</th>
-                <th className="p-3 text-slate-600 font-semibold">Jenis Izin</th>
-                <th className="p-3 text-slate-600 font-semibold">Status</th>
-                <th className="p-3 text-slate-600 font-semibold">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="p-4 text-center text-slate-500">Memuat data...</td>
-                </tr>
-              ) : dataPengajuan.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-4 text-center text-slate-500">Belum ada data pengajuan.</td>
-                </tr>
-              ) : (
-                dataPengajuan.map((item, index) => (
-                  <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="p-3 font-medium text-slate-800">{item.no_pendaftaran}</td>
-                    <td className="p-3 text-slate-700">{item.pemohon?.nama || '-'}</td>
-                    <td className="p-3 text-slate-700">{item.jenis_izin}</td>
-                    <td className="p-3">
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      {/* Tombol ke halaman detail */}
-                      <Link href={`/pengajuan/${item.id}`} className="text-blue-600 hover:underline text-sm font-semibold">
-                        Lihat Detail
-                      </Link>
-                    </td>
+        {/* Tabel Section - Bisa di-scroll horizontal di HP */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+            <div className="overflow-hidden border border-slate-200 rounded-lg">
+              <table className="min-w-full divide-y divide-slate-200 text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider text-xs">No. Daftar</th>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider text-xs">Pemohon</th>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider text-xs">Jenis Izin</th>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider text-xs">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-600 uppercase tracking-wider text-xs">Aksi</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-slate-500">Memuat data...</td>
+                    </tr>
+                  ) : dataPengajuan.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-slate-500">Belum ada data pengajuan.</td>
+                    </tr>
+                  ) : (
+                    dataPengajuan.map((item, index) => (
+                      <tr key={index} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-4 whitespace-nowrap font-medium text-slate-800">{item.no_pendaftaran}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-slate-700">{item.pemohon?.nama || '-'}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-slate-700">{item.jenis_izin}</td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${item.status === 'Selesai' ? 'bg-green-100 text-green-800' : 
+                              item.status === 'Ditolak' ? 'bg-red-100 text-red-800' : 
+                              'bg-yellow-100 text-yellow-800'}`}>
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                          <Link href={`/pengajuan/${item.id}`} className="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition">
+                            Detail
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6">
-          <Link href="/dashboard" className="text-blue-600 hover:underline">
-            &larr; Kembali ke Dashboard
+          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 text-sm flex items-center gap-2">
+            <span>&larr;</span> Kembali ke Dashboard
           </Link>
         </div>
         
