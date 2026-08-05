@@ -3,22 +3,21 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
-export default function FormPengajuanBaru() {
+export default function FormPengajuan() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  // State Data Pemohon
+  // State Pemohon
   const [nama, setNama] = useState('')
   const [nik, setNik] = useState('')
+  const [kontak, setKontak] = useState('')
   const [alamat, setAlamat] = useState('')
-  
-  // State Data Bangunan
-  const [alamatBangunan, setAlamatBangunan] = useState('')
+
+  // State Izin
+  const [jenisIzin, setJenisIzin] = useState('IMB')
   const [jenisBangunan, setJenisBangunan] = useState('Rumah Tinggal')
-  const [jenisIzin, setJenisIzin] = useState('PBG')
-  
-  // State File Upload Baru
   const [file, setFile] = useState<File | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,55 +25,55 @@ export default function FormPengajuanBaru() {
     setIsLoading(true)
 
     try {
-      // 1. Simpan Data Warga
-      const { data: dataPemohon, error: errorPemohon } = await supabase
+      // 1. Simpan Data Pemohon
+      const { data: pemohonData, error: pemohonError } = await supabase
         .from('pemohon')
-        .insert([{ nama, nik, alamat }])
+        .insert([{ nama, nik, kontak, alamat }])
         .select()
         .single()
 
-      if (errorPemohon) throw errorPemohon
+      if (pemohonError) throw pemohonError
 
-      // Bikin Nomor Pendaftaran Otomatis
-      const noDaftar = `REG-${new Date().getFullYear()}${new Date().getMonth()+1}-${Math.floor(Math.random() * 1000)}`
-
-      // 2. Proses Upload File (Kalau ada file yang dipilih)
-      let uploadedFiles = []
+      // 2. Upload Dokumen (Kalau ada)
+      let fileUrl = ''
       if (file) {
-        // Nama file dibikin unik biar gak bentrok
-        const fileName = `${noDaftar}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('dokumen-perizinan')
-          .upload(fileName, file)
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Date.now()}.${fileExt}`
+        const filePath = `berkas/${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('dokumen') // Pastikan lu punya bucket bernama 'dokumen' di Supabase
+          .upload(filePath, file)
 
         if (uploadError) {
-          throw new Error('Gagal upload dokumen: ' + uploadError.message)
-        }
-        
-        if (uploadData) {
-          uploadedFiles.push(uploadData.path) // Simpan jejak/path filenya
+            console.log("Upload error, pastikan bucket 'dokumen' sudah dibuat dan disetting public.", uploadError)
+        } else {
+            const { data: publicUrlData } = supabase.storage
+              .from('dokumen')
+              .getPublicUrl(filePath)
+            
+            fileUrl = publicUrlData.publicUrl
         }
       }
 
-      // 3. Simpan Data Bangunan & Path File
-      const { error: errorPengajuan } = await supabase
+      // 3. Simpan Data Pengajuan Izin
+      const noPendaftaran = `REG-${Math.floor(Math.random() * 100000)}`
+      
+      const { error: pengajuanError } = await supabase
         .from('pengajuan')
         .insert([{
-          pemohon_id: dataPemohon.id,
-          alamat_bangunan: alamatBangunan,
-          jenis_bangunan: jenisBangunan,
+          pemohon_id: pemohonData.id,
+          no_pendaftaran: noPendaftaran,
           jenis_izin: jenisIzin,
-          no_pendaftaran: noDaftar,
-          status: 'Draft',
-          dokumen: uploadedFiles // Masukin array file ke database
+          jenis_bangunan: jenisBangunan,
+          status: 'Menunggu',
+          file_url: fileUrl
         }])
 
-      if (errorPengajuan) throw errorPengajuan
+      if (pengajuanError) throw pengajuanError
 
-      alert('Berhasil! Data dan dokumen pengajuan tersimpan.')
-      router.push('/dashboard')
-      
+      alert('Mantap! Data pengajuan berhasil disimpan.')
+      router.push('/pengajuan')
     } catch (error: any) {
       alert('Waduh, ada error: ' + error.message)
     } finally {
@@ -83,70 +82,125 @@ export default function FormPengajuanBaru() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Form Pengajuan Izin Baru</h1>
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Header Form */}
+        <div className="bg-blue-600 p-6 sm:p-8 text-white">
+          <h1 className="text-2xl font-bold">Input Pengajuan Baru</h1>
+          <p className="text-blue-100 text-sm mt-1">Masukkan data pemohon dan detail perizinan dengan lengkap.</p>
+        </div>
+
+        {/* Form Container */}
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8">
           
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-            <h2 className="font-semibold text-slate-700 mb-4">Data Pemohon (Warga)</h2>
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Kolom Kiri: Data Pemohon */}
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
+                👤 Data Pemohon
+              </h2>
+              
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Nama Lengkap</label>
-                <input type="text" required className="w-full p-2 border rounded" value={nama} onChange={e => setNama(e.target.value)} />
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                <input 
+                  type="text" required
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="Cth: Budi Santoso"
+                  value={nama} onChange={e => setNama(e.target.value)}
+                />
               </div>
+
               <div>
-                <label className="block text-sm text-slate-600 mb-1">NIK (KTP)</label>
-                <input type="text" required className="w-full p-2 border rounded" value={nik} onChange={e => setNik(e.target.value)} />
+                <label className="block text-sm font-semibold text-slate-600 mb-1">NIK KTP</label>
+                <input 
+                  type="number" required
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="16 digit NIK"
+                  value={nik} onChange={e => setNik(e.target.value)}
+                />
               </div>
+
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Alamat Pemohon</label>
-                <input type="text" required className="w-full p-2 border rounded" value={alamat} onChange={e => setAlamat(e.target.value)} />
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Nomor HP / WhatsApp</label>
+                <input 
+                  type="text" required
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="0812xxxx..."
+                  value={kontak} onChange={e => setKontak(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
+                <textarea 
+                  required rows={3}
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="Jalan, RT/RW, Kelurahan..."
+                  value={alamat} onChange={e => setAlamat(e.target.value)}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-            <h2 className="font-semibold text-slate-700 mb-4">Data Bangunan & Dokumen</h2>
-            <div className="space-y-4">
+            {/* Kolom Kanan: Data Perizinan */}
+            <div className="space-y-5">
+              <h2 className="text-lg font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
+                📄 Detail Izin
+              </h2>
+
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Jenis Izin</label>
-                <select className="w-full p-2 border rounded" value={jenisIzin} onChange={e => setJenisIzin(e.target.value)}>
-                  <option value="PBG">PBG (Persetujuan Bangunan Gedung)</option>
-                  <option value="SLF">SLF (Sertifikat Laik Fungsi)</option>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Jenis Perizinan</label>
+                <select 
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  value={jenisIzin} onChange={e => setJenisIzin(e.target.value)}
+                >
+                  <option value="IMB">Izin Mendirikan Bangunan (IMB)</option>
+                  <option value="Izin Usaha">Izin Usaha (SIUP)</option>
+                  <option value="Izin Reklame">Izin Reklame</option>
+                  <option value="Izin Lingkungan">Izin Lingkungan (AMDAL)</option>
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Nama / Jenis Bangunan</label>
-                <input type="text" required className="w-full p-2 border rounded" value={jenisBangunan} onChange={e => setJenisBangunan(e.target.value)} />
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Fungsi / Jenis Bangunan</label>
+                <select 
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  value={jenisBangunan} onChange={e => setJenisBangunan(e.target.value)}
+                >
+                  <option value="Rumah Tinggal">Rumah Tinggal</option>
+                  <option value="Ruko / Tempat Usaha">Ruko / Tempat Usaha</option>
+                  <option value="Gudang">Gudang / Pabrik</option>
+                  <option value="Fasilitas Umum">Fasilitas Umum</option>
+                </select>
               </div>
+
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Lokasi Bangunan</label>
-                <input type="text" required className="w-full p-2 border rounded" value={alamatBangunan} onChange={e => setAlamatBangunan(e.target.value)} />
-              </div>
-              {/* TOMBOL UPLOAD FILE BARU */}
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Upload Dokumen (KTP/Denah)</label>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Upload Dokumen Pendukung (Opsional)</label>
                 <input 
                   type="file" 
-                  className="w-full p-2 border rounded bg-white" 
-                  onChange={e => setFile(e.target.files ? e.target.files[0] : null)} 
+                  className="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                  onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
                 />
-                <p className="text-xs text-slate-500 mt-1">*Format bebas (PDF/JPG/PNG)</p>
+                <p className="text-xs text-slate-500 mt-2">Format PDF/JPG/PNG. Maks 5MB.</p>
               </div>
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white font-semibold p-3 rounded hover:bg-blue-700 transition-colors disabled:bg-slate-400"
-          >
-            {isLoading ? 'Menyimpan & Upload...' : 'Simpan Pengajuan'}
-          </button>
-        </form>
+          {/* Area Tombol Bawah */}
+          <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+            <Link href="/dashboard" className="text-slate-500 hover:text-slate-800 font-medium">
+              Batalkan
+            </Link>
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Menyimpan Data...' : 'Simpan Pengajuan'}
+            </button>
+          </div>
 
+        </form>
       </div>
     </div>
   )
