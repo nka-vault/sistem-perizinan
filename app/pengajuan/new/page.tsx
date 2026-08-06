@@ -18,6 +18,7 @@ export default function FormPengajuan() {
   // State Izin
   const [jenisIzin, setJenisIzin] = useState('PBG')
   const [jenisBangunan, setJenisBangunan] = useState('Rumah Tinggal')
+  const [alamatBangunan, setAlamatBangunan] = useState('') // <-- Tambahan State Alamat Bangunan
   const [file, setFile] = useState<File | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +99,7 @@ export default function FormPengajuan() {
           no_pendaftaran: noPendaftaran,
           jenis_izin: jenisIzin,
           jenis_bangunan: jenisBangunan,
+          alamat_bangunan: alamatBangunan, // <-- Tambahan kirim data ke Database
           status: 'Menunggu',
           file_url: fileUrl
         }])
@@ -164,9 +166,9 @@ export default function FormPengajuan() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Alamat Sesuai KTP</label>
                 <textarea 
-                  required rows={3}
+                  required rows={2}
                   className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="Jalan, RT/RW, Kelurahan..."
                   value={alamat} onChange={e => setAlamat(e.target.value)}
@@ -206,6 +208,17 @@ export default function FormPengajuan() {
                   <option value="Gudang / Pabrik">Gudang / Pabrik</option>
                   <option value="Fasilitas Umum / Sosial">Fasilitas Umum / Sosial</option>
                 </select>
+              </div>
+
+              {/* Tambahan Form Input Alamat Bangunan */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Lokasi Proyek / Bangunan</label>
+                <textarea 
+                  required rows={2}
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  placeholder="Alamat lengkap proyek bangunan..."
+                  value={alamatBangunan} onChange={e => setAlamatBangunan(e.target.value)}
+                />
               </div>
 
               <div>
