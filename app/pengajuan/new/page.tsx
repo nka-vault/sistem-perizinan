@@ -15,7 +15,7 @@ export default function FormPengajuan() {
   const [kontak, setKontak] = useState('')
   const [alamat, setAlamat] = useState('')
 
-  // State Izin (Default sekarang PBG)
+  // State Izin
   const [jenisIzin, setJenisIzin] = useState('PBG')
   const [jenisBangunan, setJenisBangunan] = useState('Rumah Tinggal')
   const [file, setFile] = useState<File | null>(null)
@@ -45,7 +45,6 @@ export default function FormPengajuan() {
 
       if (cekError) throw cekError
 
-      // Kalau pemohonnya BELUM ADA, kita insert baru
       if (!pemohonData) {
         const { data: newPemohon, error: pemohonError } = await supabase
           .from('pemohon')
@@ -56,7 +55,6 @@ export default function FormPengajuan() {
         if (pemohonError) throw pemohonError
         pemohonData = newPemohon
       } else {
-        // Kalau pemohonnya SUDAH ADA, kita update datanya barangkali dia ganti alamat/no HP
         const { data: updatedPemohon, error: updateError } = await supabase
           .from('pemohon')
           .update({ nama, kontak, alamat })
@@ -139,7 +137,7 @@ export default function FormPengajuan() {
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Nama Lengkap</label>
                 <input 
                   type="text" required
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="Cth: Budi Santoso"
                   value={nama} onChange={e => setNama(e.target.value)}
                 />
@@ -149,7 +147,7 @@ export default function FormPengajuan() {
                 <label className="block text-sm font-semibold text-slate-600 mb-1">NIK KTP</label>
                 <input 
                   type="number" required
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="16 digit NIK"
                   value={nik} onChange={e => setNik(e.target.value)}
                 />
@@ -159,7 +157,7 @@ export default function FormPengajuan() {
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Nomor HP / WhatsApp</label>
                 <input 
                   type="text" required
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="0812xxxx..."
                   value={kontak} onChange={e => setKontak(e.target.value)}
                 />
@@ -169,7 +167,7 @@ export default function FormPengajuan() {
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
                 <textarea 
                   required rows={3}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   placeholder="Jalan, RT/RW, Kelurahan..."
                   value={alamat} onChange={e => setAlamat(e.target.value)}
                 />
@@ -185,7 +183,7 @@ export default function FormPengajuan() {
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Jenis Perizinan</label>
                 <select 
-                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   value={jenisIzin} onChange={e => setJenisIzin(e.target.value)}
                 >
                   <option value="PBG">Persetujuan Bangunan Gedung (PBG)</option>
@@ -200,7 +198,7 @@ export default function FormPengajuan() {
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Fungsi / Jenis Bangunan</label>
                 <select 
-                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   value={jenisBangunan} onChange={e => setJenisBangunan(e.target.value)}
                 >
                   <option value="Rumah Tinggal">Rumah Tinggal</option>
@@ -214,7 +212,7 @@ export default function FormPengajuan() {
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Upload Dokumen Pendukung (Opsional)</label>
                 <input 
                   type="file" 
-                  className="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                  className="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                   onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
                 />
                 <p className="text-xs text-slate-500 mt-2">Format PDF/JPG/PNG. Maks 15MB.</p>

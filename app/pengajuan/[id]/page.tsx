@@ -131,7 +131,7 @@ export default function DetailPengajuan({ params }: { params: Promise<{ id: stri
             <h3 className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Tindakan Petugas</h3>
             <div className="flex flex-col sm:flex-row gap-3">
               <select 
-                className="flex-1 p-3 border border-slate-300 rounded-lg bg-white outline-none"
+                className="flex-1 p-3 border border-slate-300 rounded-lg bg-white text-slate-800 outline-none"
                 value={statusInput}
                 onChange={(e) => setStatusInput(e.target.value)}
               >
