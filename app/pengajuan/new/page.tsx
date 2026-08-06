@@ -15,29 +15,26 @@ export default function FormPengajuan() {
   const [kontak, setKontak] = useState('')
   const [alamat, setAlamat] = useState('')
 
-  // State Izin
-  const [jenisIzin, setJenisIzin] = useState('IMB')
+  // State Izin (Default sekarang PBG)
+  const [jenisIzin, setJenisIzin] = useState('PBG')
   const [jenisBangunan, setJenisBangunan] = useState('Rumah Tinggal')
   const [file, setFile] = useState<File | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     
-    // --- TAMBAHKAN KODE VALIDASI FILE DI SINI ---
+    // --- VALIDASI UKURAN FILE (Maks 15 MB) ---
     if (file) {
-      const fileSizeInMB = file.size / (1024 * 1024); // Convert byte ke MB
-      if (fileSizeInMB > 15) { // Angka 15 ini batas maksimalnya (15 MB)
+      const fileSizeInMB = file.size / (1024 * 1024);
+      if (fileSizeInMB > 15) { 
         alert(`Waduh, ukuran file terlalu besar (${fileSizeInMB.toFixed(2)} MB). Maksimal 15 MB ya bro!`);
-        return; // Hentikan proses simpan
+        return; 
       }
     }
-    // --------------------------------------------
+    // ----------------------------------------
 
-    setIsLoading(true)
+    setIsLoading(true) 
     
-    // ... (sisa kode di bawahnya biarkan sama seperti sebelumnya)
-
     try {
       // 1. Simpan Data Pemohon
       const { data: pemohonData, error: pemohonError } = await supabase
@@ -48,7 +45,7 @@ export default function FormPengajuan() {
 
       if (pemohonError) throw pemohonError
 
-      // 2. Upload Dokumen (Kalau ada)
+      // 2. Upload Dokumen
       let fileUrl = ''
       if (file) {
         const fileExt = file.name.split('.').pop()
@@ -56,7 +53,7 @@ export default function FormPengajuan() {
         const filePath = `berkas/${fileName}`
 
         const { error: uploadError } = await supabase.storage
-          .from('dokumen') // Pastikan lu punya bucket bernama 'dokumen' di Supabase
+          .from('dokumen') 
           .upload(filePath, file)
 
         if (uploadError) {
@@ -168,10 +165,12 @@ export default function FormPengajuan() {
                   className="w-full p-2.5 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   value={jenisIzin} onChange={e => setJenisIzin(e.target.value)}
                 >
-                  <option value="IMB">Izin Mendirikan Bangunan (IMB)</option>
-                  <option value="Izin Usaha">Izin Usaha (SIUP)</option>
-                  <option value="Izin Reklame">Izin Reklame</option>
-                  <option value="Izin Lingkungan">Izin Lingkungan (AMDAL)</option>
+                  <option value="PBG">Persetujuan Bangunan Gedung (PBG)</option>
+                  <option value="SLF">Sertifikat Laik Fungsi (SLF)</option>
+                  <option value="SBKBG">Surat Bukti Kepemilikan Bangunan Gedung</option>
+                  <option value="KRK">Keterangan Rencana Kota (KRK)</option>
+                  <option value="Amdal Lalu Lintas">Amdal Lalu Lintas (Andalalin)</option>
+                  <option value="Izin Lingkungan">Izin Lingkungan (SPPL/UKL-UPL)</option>
                 </select>
               </div>
 
@@ -183,8 +182,8 @@ export default function FormPengajuan() {
                 >
                   <option value="Rumah Tinggal">Rumah Tinggal</option>
                   <option value="Ruko / Tempat Usaha">Ruko / Tempat Usaha</option>
-                  <option value="Gudang">Gudang / Pabrik</option>
-                  <option value="Fasilitas Umum">Fasilitas Umum</option>
+                  <option value="Gudang / Pabrik">Gudang / Pabrik</option>
+                  <option value="Fasilitas Umum / Sosial">Fasilitas Umum / Sosial</option>
                 </select>
               </div>
 
@@ -195,7 +194,7 @@ export default function FormPengajuan() {
                   className="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                   onChange={e => setFile(e.target.files ? e.target.files[0] : null)}
                 />
-                <p className="text-xs text-slate-500 mt-2">Format PDF/JPG/PNG. Maks 5MB.</p>
+                <p className="text-xs text-slate-500 mt-2">Format PDF/JPG/PNG. Maks 15MB.</p>
               </div>
             </div>
           </div>
