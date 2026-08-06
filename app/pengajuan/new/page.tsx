@@ -23,6 +23,20 @@ export default function FormPengajuan() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    
+    // --- TAMBAHKAN KODE VALIDASI FILE DI SINI ---
+    if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024); // Convert byte ke MB
+      if (fileSizeInMB > 15) { // Angka 15 ini batas maksimalnya (15 MB)
+        alert(`Waduh, ukuran file terlalu besar (${fileSizeInMB.toFixed(2)} MB). Maksimal 15 MB ya bro!`);
+        return; // Hentikan proses simpan
+      }
+    }
+    // --------------------------------------------
+
+    setIsLoading(true)
+    
+    // ... (sisa kode di bawahnya biarkan sama seperti sebelumnya)
 
     try {
       // 1. Simpan Data Pemohon
