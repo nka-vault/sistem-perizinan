@@ -132,7 +132,7 @@ export default function DaftarPengajuan() {
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500 font-medium">Waduh, datanya nggak ketemu bro.</td>
+                    <td colSpan={5} className="p-8 text-center text-slate-500 font-medium">Belum ada data pengajuan.</td>
                   </tr>
                 ) : (
                   filteredData.map((item) => (
