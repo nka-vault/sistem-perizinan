@@ -98,7 +98,7 @@ export default function DetailPengajuan({ params }: { params: Promise<{ id: stri
                 <div><p className="text-xs font-semibold text-slate-500 uppercase">Nama Lengkap</p><p className="text-slate-800 font-medium mt-1">{data.pemohon?.nama}</p></div>
                 <div><p className="text-xs font-semibold text-slate-500 uppercase">NIK</p><p className="text-slate-800 font-medium mt-1">{data.pemohon?.nik}</p></div>
                 <div><p className="text-xs font-semibold text-slate-500 uppercase">Kontak</p><p className="text-slate-800 font-medium mt-1">{data.pemohon?.kontak}</p></div>
-                <div><p className="text-xs font-semibold text-slate-500 uppercase">Alamat</p><p className="text-slate-800 mt-1">{data.pemohon?.alamat}</p></div>
+                <div><p className="text-xs font-semibold text-slate-500 uppercase">Alamat Sesuai KTP</p><p className="text-slate-800 mt-1">{data.pemohon?.alamat}</p></div>
               </div>
             </div>
 
@@ -108,6 +108,10 @@ export default function DetailPengajuan({ params }: { params: Promise<{ id: stri
               <div className="space-y-4">
                 <div><p className="text-xs font-semibold text-slate-500 uppercase">Jenis Izin</p><p className="text-slate-800 font-medium mt-1">{data.jenis_izin}</p></div>
                 <div><p className="text-xs font-semibold text-slate-500 uppercase">Fungsi Bangunan</p><p className="text-slate-800 font-medium mt-1">{data.jenis_bangunan}</p></div>
+                
+                {/* INI TAMBAHANNYA: Lokasi Proyek */}
+                <div><p className="text-xs font-semibold text-slate-500 uppercase">Lokasi Proyek / Bangunan</p><p className="text-slate-800 font-medium mt-1">{data.alamat_bangunan}</p></div>
+                
                 <div className="print:hidden">
                   <p className="text-xs font-semibold text-slate-500 uppercase">Dokumen Lampiran</p>
                   <div className="mt-2">
