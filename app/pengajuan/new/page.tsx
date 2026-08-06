@@ -36,14 +36,37 @@ export default function FormPengajuan() {
     setIsLoading(true) 
     
     try {
-      // 1. Simpan Data Pemohon
-      const { data: pemohonData, error: pemohonError } = await supabase
+      // 1. Cek & Simpan Data Pemohon (Anti Duplikat NIK)
+      let { data: pemohonData, error: cekError } = await supabase
         .from('pemohon')
-        .insert([{ nama, nik, kontak, alamat }])
         .select()
-        .single()
+        .eq('nik', nik)
+        .maybeSingle() 
 
-      if (pemohonError) throw pemohonError
+      if (cekError) throw cekError
+
+      // Kalau pemohonnya BELUM ADA, kita insert baru
+      if (!pemohonData) {
+        const { data: newPemohon, error: pemohonError } = await supabase
+          .from('pemohon')
+          .insert([{ nama, nik, kontak, alamat }])
+          .select()
+          .single()
+
+        if (pemohonError) throw pemohonError
+        pemohonData = newPemohon
+      } else {
+        // Kalau pemohonnya SUDAH ADA, kita update datanya barangkali dia ganti alamat/no HP
+        const { data: updatedPemohon, error: updateError } = await supabase
+          .from('pemohon')
+          .update({ nama, kontak, alamat })
+          .eq('id', pemohonData.id)
+          .select()
+          .single()
+          
+        if (updateError) throw updateError
+        pemohonData = updatedPemohon
+      }
 
       // 2. Upload Dokumen
       let fileUrl = ''
